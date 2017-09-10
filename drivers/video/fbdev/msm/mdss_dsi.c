@@ -1592,15 +1592,6 @@ int mdss_dsi_on(struct mdss_panel_data *pdata)
 	if (mipi->init_delay)
 		usleep_range(mipi->init_delay, mipi->init_delay);
 
-	if (mipi->force_clk_lane_hs) {
-		u32 tmp;
-
-		tmp = MIPI_INP((ctrl_pdata->ctrl_base) + 0xac);
-		tmp |= (1<<28);
-		MIPI_OUTP((ctrl_pdata->ctrl_base) + 0xac, tmp);
-		wmb();
-	}
-
 	if (pdata->panel_info.type == MIPI_CMD_PANEL)
 		mdss_dsi_clk_ctrl(ctrl_pdata, ctrl_pdata->dsi_clk_handle,
 				  MDSS_DSI_ALL_CLKS, MDSS_DSI_CLK_OFF);
@@ -2570,7 +2561,7 @@ static void mdss_dsi_dba_work(struct work_struct *work)
 	} else {
 		pr_debug("%s: dba device not ready, queue again\n", __func__);
 		queue_delayed_work(ctrl_pdata->workq,
-				&ctrl_pdata->dba_work, msecs_to_jiffies(1000));
+				&ctrl_pdata->dba_work, HZ);
 	}
 }
 
@@ -2868,7 +2859,7 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 		if (IS_ENABLED(CONFIG_MSM_DBA) &&
 			pdata->panel_info.is_dba_panel) {
 				queue_delayed_work(ctrl_pdata->workq,
-					&ctrl_pdata->dba_work, msecs_to_jiffies(1000));
+					&ctrl_pdata->dba_work, HZ);
 		}
 		break;
 	case MDSS_EVENT_PANEL_SET_ACL:
